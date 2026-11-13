@@ -20,10 +20,10 @@ import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.aot.DisabledInAotMode;
@@ -34,9 +34,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -104,13 +104,19 @@ class VetControllerTests {
 	}
 
 	@Test
-	void showVetListKeepsQueryOffsetWithinIntRangeForHugePageNumbers() throws Exception {
-		mockMvc.perform(get("/vets.html").param("page", Integer.toString(Integer.MAX_VALUE)))
-			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/vets.html?page=1"));
-		ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
-		verify(this.vets).findAll(pageable.capture());
-		assertThat(pageable.getValue().getOffset()).isLessThanOrEqualTo(Integer.MAX_VALUE);
+	void showVetListRedirectsOutOfRangePagesWithoutQueryingThem() throws Exception {
+		for (int page : List.of(0, 2, 429496731, Integer.MAX_VALUE)) {
+			mockMvc.perform(get("/vets.html").param("page", Integer.toString(page)))
+				.andExpect(status().is3xxRedirection())
+				.andExpect(redirectedUrl("/vets.html?page=1"));
+		}
+		verify(this.vets, never()).findAll(any(Pageable.class));
+	}
+
+	@Test
+	void showVetListQueriesTheRequestedPage() throws Exception {
+		mockMvc.perform(get("/vets.html").param("page", "1")).andExpect(status().isOk());
+		verify(this.vets).findAll(PageRequest.of(0, 5));
 	}
 
 	@Test

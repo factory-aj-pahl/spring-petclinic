@@ -32,7 +32,10 @@ import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -55,6 +58,9 @@ class UntrustedInputIntegrationTests {
 	@Autowired
 	private TestRestTemplate rest;
 
+	@Autowired
+	private CacheManager cacheManager;
+
 	@ParameterizedTest(name = "{0}")
 	@CsvSource({ "/owners?page=0, /owners?page=1", "/owners?page=-2147483648, /owners?page=1",
 			"/owners?page=429496730, /owners?page=1", "/owners?page=429496731, /owners?page=1",
@@ -69,6 +75,20 @@ class UntrustedInputIntegrationTests {
 		URI location = response.getHeaders().getLocation();
 		assertThat(location).isNotNull();
 		assertThat(location.getRawPath() + "?" + location.getRawQuery()).isEqualTo(expectedLocation);
+	}
+
+	// /vets.html results are cached per page in a cache without a size limit, so a page
+	// number that is out of range must never reach the cached query.
+	@Test
+	void outOfRangeVetPagesAreNotCached() {
+		Cache vets = this.cacheManager.getCache("vets");
+		assertThat(vets).isNotNull();
+		for (int page = 3; page <= 202; page++) {
+			ResponseEntity<String> response = this.rest.withRedirects(HttpRedirects.DONT_FOLLOW)
+				.getForEntity("/vets.html?page=" + page, String.class);
+			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FOUND);
+			assertThat(vets.get(PageRequest.of(page - 1, 5))).as("cache entry for page %d", page).isNull();
+		}
 	}
 
 	@ParameterizedTest(name = "{0}")

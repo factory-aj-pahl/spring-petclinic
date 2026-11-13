@@ -19,7 +19,6 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,6 +35,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 class VetController {
 
+	private static final int PAGE_SIZE = 5;
+
 	private final VetRepository vetRepository;
 
 	public VetController(VetRepository vetRepository) {
@@ -45,11 +46,15 @@ class VetController {
 	@GetMapping("/vets.html")
 	public String showVetList(@RequestParam(defaultValue = "1") int page, Model model,
 			RedirectAttributes redirectAttributes) {
-		Page<Vet> paginated = findPaginated(page);
-		if (page < 1 || page > Math.max(paginated.getTotalPages(), 1)) {
+		// The paged query is cached per page in a cache without a size limit, so check
+		// the range first: querying every requested page number would let any client
+		// fill the cache.
+		int lastPage = Math.max(1, (int) Math.ceil((double) this.vetRepository.findAll().size() / PAGE_SIZE));
+		if (page < 1 || page > lastPage) {
 			redirectAttributes.addAttribute("page", 1);
 			return "redirect:/vets.html";
 		}
+		Page<Vet> paginated = this.vetRepository.findAll(PageRequest.of(page - 1, PAGE_SIZE));
 		return addPaginationModel(page, paginated, model);
 	}
 
@@ -60,15 +65,6 @@ class VetController {
 		model.addAttribute("totalItems", paginated.getTotalElements());
 		model.addAttribute("listVets", listVets);
 		return "vets/vetList";
-	}
-
-	private Page<Vet> findPaginated(int page) {
-		int pageSize = 5;
-		// Spring Data JPA rejects query offsets above Integer.MAX_VALUE, so cap the
-		// page; a huge page number then gets the out-of-range redirect.
-		int safePage = Math.min(Math.max(page, 1), Integer.MAX_VALUE / pageSize);
-		Pageable pageable = PageRequest.of(safePage - 1, pageSize);
-		return vetRepository.findAll(pageable);
 	}
 
 	@GetMapping({ "/vets" })
