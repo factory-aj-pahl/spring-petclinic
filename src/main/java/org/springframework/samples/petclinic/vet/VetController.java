@@ -64,7 +64,9 @@ class VetController {
 
 	private Page<Vet> findPaginated(int page) {
 		int pageSize = 5;
-		int safePage = Math.max(page, 1);
+		// Spring Data JPA rejects query offsets above Integer.MAX_VALUE, so cap the
+		// page; a huge page number then gets the out-of-range redirect.
+		int safePage = Math.min(Math.max(page, 1), Integer.MAX_VALUE / pageSize);
 		Pageable pageable = PageRequest.of(safePage - 1, pageSize);
 		return vetRepository.findAll(pageable);
 	}

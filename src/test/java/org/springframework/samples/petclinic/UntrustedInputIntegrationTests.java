@@ -57,7 +57,11 @@ class UntrustedInputIntegrationTests {
 
 	@ParameterizedTest(name = "{0}")
 	@CsvSource({ "/owners?page=0, /owners?page=1", "/owners?page=-2147483648, /owners?page=1",
-			"/owners?page=429496730, /owners?page=1", "/vets.html?page=-2147483648, /vets.html?page=1" })
+			"/owners?page=429496730, /owners?page=1", "/owners?page=429496731, /owners?page=1",
+			"/owners?page=2147483647, /owners?page=1",
+			"/owners?page=2147483647&lastName=Davis, /owners?page=1&lastName=Davis",
+			"/vets.html?page=-2147483648, /vets.html?page=1", "/vets.html?page=429496731, /vets.html?page=1",
+			"/vets.html?page=2147483647, /vets.html?page=1" })
 	void outOfRangePageNumberRedirectsToTheFirstPage(String path, String expectedLocation) {
 		ResponseEntity<String> response = this.rest.withRedirects(HttpRedirects.DONT_FOLLOW)
 			.getForEntity(path, String.class);
