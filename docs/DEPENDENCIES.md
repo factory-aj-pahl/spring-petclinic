@@ -134,6 +134,17 @@ The reachability column is Inferred from reading the code and configuration. Not
 
 About half of the advisories are likely unreachable in the default configuration. The other half cannot be ruled out, including two critical Tomcat ones, and the upgrade stays on the 4.1.x patch line without code changes. That is why all 20 were fixed instead of triaging each one.
 
+## Open questions
+
+The repository cannot answer these questions, so they are Unknown. Someone who runs or owns the service has to answer them.
+
+| Question | Why it matters | Where it shows up |
+|----------|----------------|-------------------|
+| Who owns the service and reviews changes to it? | No CODEOWNERS file names an owner, and branch protection on `main` could not be checked (F13 in `docs/RUNBOOK.md`). | `.github/` |
+| Who builds the `dsyer/petclinic` image, and from which commit? | The 4.1.2 fix reaches Kubernetes only through a rebuilt image (F4). | `k8s/petclinic.yml` |
+| Where does the application run in production, and how are TLS, database backups and secrets handled there? | The repository has no production configuration: no `server.ssl.*` property, no backup job and no secret store. `k8s/` is a demo setup (F5). | `src/main/resources/application.properties`, `k8s/` |
+| Who calls `/vets` and the Actuator endpoints? | Restricting Actuator (F1) or changing the `/vets` formats could break a caller that the repository does not know about. | `src/main/java/org/springframework/samples/petclinic/vet/VetController.java`, `src/main/resources/application.properties` |
+| What were `./conf.d` and `mysql-default-conf` meant for? | `docker-compose.yml` mounts a `./conf.d` directory that is not in the repository (F7), and `PetClinicRuntimeHints` registers a `mysql-default-conf` resource that does not exist. | `docker-compose.yml`, `src/main/java/org/springframework/samples/petclinic/PetClinicRuntimeHints.java` |
 ## Keeping this current
 
 - `PatchedDependencyVersionsTests` fails the build if any of the six libraries above resolves below its first fixed version. When a new advisory is fixed, add or raise the minimum there and add the advisory to the table above.
