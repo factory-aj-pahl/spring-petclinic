@@ -1,0 +1,92 @@
+project: Spring PetClinic
+platform: github
+imagemagick: true
+video_evidence: false # record interactive flows through droid-control
+droid_control:
+  plugin: droid-control@factory-plugins
+  compose: false # single runtime toggle for optional edited MP4 output
+
+environments:
+  local:
+    url: http://localhost:8080
+    description: >-
+      The application built from the checked-out branch and started on this machine with the
+      default in-memory H2 database. This is the only QA target: PetClinic has no hosted
+      development, staging, preview or production environment, and the Kubernetes manifests
+      deploy an unrelated image.
+    restrictions:
+      - 'Only test a server that this run started from the branch under test. Never use another URL.'
+      - 'Use the default H2 database. Do not start the mysql or postgres profiles or the Docker Compose services.'
+      - 'If port 8080 is taken, start on another free port (for example 18080) instead of reusing the running server.'
+
+default_target: local
+
+auth:
+  method: none
+  provider: none
+  notes: >-
+    PetClinic has no login, user accounts or roles. Every page and endpoint is public, Actuator
+    included (known issue F1 in docs/RUNBOOK.md).
+
+personas:
+  - name: visitor
+    description: 'Clinic staff member using the public web UI and the JSON endpoints. No account needed.'
+    credentials_source: none
+    test_focus:
+      - 'owner, pet and visit records'
+      - 'form validation messages'
+      - 'paging and page-number bounds'
+      - 'vets list and vets JSON'
+      - 'language switch'
+      - 'health, info and SBOM endpoints'
+    cannot_do:
+      - 'Save an owner, pet or visit that fails validation'
+      - 'Cause an HTTP 500 response through form input or page numbers (the /oups demo page and known issue F3 excepted)'
+      - 'Shut the application down through Actuator'
+
+# Both apps are served by the same server, built once. build_command skips the format and nohttp
+# checks, which CI runs separately, so a lint problem cannot block functional QA.
+apps:
+  web:
+    path_patterns:
+      - 'src/main/java/**'
+      - 'src/main/resources/templates/**'
+      - 'src/main/resources/static/**'
+      - 'src/main/resources/messages/**'
+      - 'src/main/resources/db/h2/**'
+      - 'src/main/resources/application.properties'
+      - 'src/main/scss/**'
+      - 'pom.xml'
+    skill: qa-web
+    test_tool: agent-browser
+    build_command: './mvnw -B -q -DskipTests -Dspring-javaformat.skip=true -Dcheckstyle.skip=true package'
+  api:
+    path_patterns:
+      - 'src/main/java/org/springframework/samples/petclinic/vet/**'
+      - 'src/main/java/org/springframework/samples/petclinic/model/**'
+      - 'src/main/java/org/springframework/samples/petclinic/system/**'
+      - 'src/main/resources/db/h2/**'
+      - 'src/main/resources/application.properties'
+      - 'pom.xml'
+    skill: qa-api
+    test_tool: curl
+    build_command: './mvnw -B -q -DskipTests -Dspring-javaformat.skip=true -Dcheckstyle.skip=true package'
+
+feature_flags:
+  provider: none
+  dashboard_url: ''
+  how_to_override: 'Not applicable: PetClinic does not use feature flags.'
+
+# No payment, email, SMS or other external services. The only backing service is the
+# in-memory H2 database.
+integrations: {}
+
+cleanup:
+  auto_cleanup: true
+  strategy: reset-db
+  instructions: >-
+    H2 runs in memory, so stopping the server discards every owner, pet and visit QA created.
+    Stop the server this run started when the run ends. Records persist while it runs, so give
+    new records names that include the run ID.
+
+failure_learning: suggest_in_report

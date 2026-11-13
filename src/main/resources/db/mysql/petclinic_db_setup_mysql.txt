@@ -8,14 +8,15 @@
 
 --------------------------------------------------------------------------------
 
-1) Download and install the MySQL database (e.g., MySQL Community Server 5.1.x),
-   which can be found here: https://dev.mysql.com/downloads/. Or run the
-   "docker-compose.yml" from the root of the project (if you have docker installed
+1) Download and install the MySQL database (e.g., MySQL Community Server 9.x, the
+   version that "docker-compose.yml" and the tests use), which can be found here:
+   https://dev.mysql.com/downloads/. Or start the "mysql" service from the
+   "docker-compose.yml" in the root of the project (if you have Docker installed
    locally):
 
-        $ docker-compose up
+        $ docker compose up mysql
         ...
-        mysql_1_eedb4818d817 | MySQL init process done. Ready for start up.
+        mysql-1  | ... [Entrypoint]: MySQL init process done. Ready for start up.
         ...
 
 2) (Once only) create the PetClinic database and user by executing the "db/mysql/user.sql"
@@ -26,7 +27,7 @@
 3) Run the app with `spring.profiles.active=mysql` (e.g. as a System property via the command
    line, but any way that sets that property in a Spring Boot app should work). For example use
    
-   mvn spring-boot:run -Dspring-boot.run.profiles=mysql
+   ./mvnw spring-boot:run -Dspring-boot.run.profiles=mysql
 
    To activate the profile on the command line.
 

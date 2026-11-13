@@ -1,0 +1,198 @@
+# Runs the Droid QA skill (.factory/skills/qa) on every pull request to main and keeps one
+# report comment on the pull request up to date. Pull requests that change only droid-wiki/
+# (the Droid Wiki Refresh pull request) change no application code and are skipped.
+#
+# Informational only: this check does not block merging. Do not add it to the required status
+# checks of the main branch.
+#
+# Needs the FACTORY_API_KEY repository secret. Without it, the report comment says that QA did not
+# run. Dependabot pull requests read Dependabot secrets instead; a key added there is available to
+# the updated libraries during the build (F21 in docs/RUNBOOK.md). QA_EVIDENCE_TOKEN is only used
+# when video_evidence is true in .factory/skills/qa/config.yaml.
+name: QA
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - 'droid-wiki/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: qa-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    # Pull requests from forks do not get repository secrets.
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Droid runs with --auto high, so keep the GitHub token out of .git/config.
+          persist-credentials: false
+
+      - name: Check for the Factory API key
+        id: api_key
+        env:
+          FACTORY_API_KEY: ${{ secrets.FACTORY_API_KEY }}
+        run: |
+          if [ -n "$FACTORY_API_KEY" ]; then
+            echo "set=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "set=false" >> "$GITHUB_OUTPUT"
+          echo "::warning::The FACTORY_API_KEY secret is not available, so QA does not run."
+          mkdir -p qa-results
+          # The backticks are Markdown code spans, not command substitution.
+          # shellcheck disable=SC2016
+          printf '%s\n' '## QA Report' '' \
+            ':no_entry: QA did not run: the `FACTORY_API_KEY` secret is not available to this workflow run.' '' \
+            'Add it as a repository secret under Settings > Secrets and variables > Actions. Dependabot pull requests read Dependabot secrets; see F21 in docs/RUNBOOK.md before adding it there.' \
+            > qa-results/report.md
+
+      - name: Read QA settings
+        id: settings
+        run: |
+          config=.factory/skills/qa/config.yaml
+          {
+            echo "imagemagick=$(yq '.imagemagick' "$config")"
+            echo "video_evidence=$(yq '.video_evidence' "$config")"
+            echo "compose=$(yq '.droid_control.compose' "$config")"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Install ImageMagick
+        if: steps.api_key.outputs.set == 'true' && steps.settings.outputs.imagemagick == 'true'
+        run: command -v convert || { sudo apt-get update -qq && sudo apt-get install -y -qq imagemagick; }
+
+      - name: Install ffmpeg
+        if: steps.api_key.outputs.set == 'true' && (steps.settings.outputs.video_evidence == 'true' || steps.settings.outputs.compose == 'true')
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+
+      - uses: actions/setup-node@v4
+        if: steps.api_key.outputs.set == 'true'
+        with:
+          node-version: 22
+
+      - name: Set up JDK 17
+        if: steps.api_key.outputs.set == 'true'
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Install agent-browser
+        if: steps.api_key.outputs.set == 'true'
+        run: |
+          npm install -g agent-browser@0.43.0
+          agent-browser install --with-deps
+
+      - name: Install Droid CLI
+        if: steps.api_key.outputs.set == 'true'
+        run: |
+          curl -fsSL https://app.factory.ai/cli | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          echo "$HOME/.factory/bin" >> "$GITHUB_PATH"
+
+      - name: Run QA
+        id: qa
+        if: steps.api_key.outputs.set == 'true'
+        continue-on-error: true
+        timeout-minutes: 18
+        env:
+          CI: true
+          FACTORY_API_KEY: ${{ secrets.FACTORY_API_KEY }}
+          BASE_REF: ${{ github.base_ref || github.event.repository.default_branch }}
+          VIDEO_EVIDENCE: ${{ steps.settings.outputs.video_evidence }}
+          COMPOSE: ${{ steps.settings.outputs.compose }}
+          QA_EVIDENCE_TOKEN: ${{ steps.settings.outputs.video_evidence == 'true' && secrets.QA_EVIDENCE_TOKEN || '' }}
+          REPO_ID: ${{ github.event.repository.id }}
+        run: |
+          mkdir -p qa-results
+          prompt="You are running in a non-interactive CI environment. There is NO human available. Do NOT use AskUser, do NOT wait for confirmations, do NOT pause for input. Run the qa skill. The diff base is origin/${BASE_REF}. Write the final report to qa-results/report.md."
+          if [ "$VIDEO_EVIDENCE" = "true" ]; then
+            prompt="$prompt Use droid-control Capture and upload video evidence per the qa skill's Evidence Capture rules."
+          fi
+          if [ "$COMPOSE" = "true" ]; then
+            prompt="$prompt Run droid-control Compose for each captured flow before upload."
+          fi
+          droid exec --auto high "$prompt" 2>&1 | tee qa-output.txt
+          exit "${PIPESTATUS[0]}"
+
+      - name: Upload QA results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            qa-results/
+            qa-output.txt
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Post the QA report on the pull request
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ARTIFACT: qa-results-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          body="$RUNNER_TEMP/qa-body.md"
+          comment="$RUNNER_TEMP/qa-comment.md"
+          : > "$body"
+          if [ -f qa-results/report.md ]; then
+            # The comment must start with the QA Report heading.
+            if ! awk 'NF { print; exit }' qa-results/report.md | grep -q '^## QA Report'; then
+              printf '## QA Report\n\n' >> "$body"
+            fi
+            cat qa-results/report.md >> "$body"
+          else
+            {
+              printf '## QA Report\n\n:no_entry: The QA run did not write a report.\n\n'
+              printf '<details>\n<summary>Last 200 lines of the QA output</summary>\n\n```text\n'
+              tail -n 200 qa-output.txt 2>/dev/null || echo 'No output was captured.'
+              printf '```\n\n</details>\n'
+            } >> "$body"
+          fi
+          # GitHub rejects comments longer than 65,536 characters. Cut the report at a line break,
+          # close the code block and <details> blocks the cut left open, then add the footer.
+          if [ "$(wc -c < "$body")" -gt 60000 ]; then
+            head -c 60000 "$body" | sed '$d' > "$body.short"
+            if [ $(( $(grep -c '^ *```' "$body.short") % 2 )) -eq 1 ]; then
+              printf '```\n' >> "$body.short"
+            fi
+            open_details=$(( $(grep -o '<details' "$body.short" | wc -l) - $(grep -o '</details>' "$body.short" | wc -l) ))
+            for _ in $(seq 1 "$open_details"); do
+              printf '\n</details>\n' >> "$body.short"
+            done
+            printf '\n_The report was cut short. The full report is in the artifact._\n' >> "$body.short"
+            mv "$body.short" "$body"
+          fi
+          {
+            echo '<!-- qa-report -->'
+            cat "$body"
+            # The backticks are a Markdown code span, not command substitution.
+            # shellcheck disable=SC2016
+            printf '\n---\n\nScreenshots and logs are in the `%s` artifact of [this workflow run](%s). This check is informational and does not block merging.\n' "$ARTIFACT" "$RUN_URL"
+          } > "$comment"
+          comment_id=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+            | jq -rs 'add // [] | map(select(.user.login == "github-actions[bot]" and ((.body // "") | startswith("<!-- qa-report -->")))) | first | .id // empty')
+          if [ -n "$comment_id" ]; then
+            gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" -F body=@"$comment" > /dev/null
+          else
+            gh api --method POST "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" -F body=@"$comment" > /dev/null
+          fi
+
+      - name: Add the report to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f qa-results/report.md ]; then cat qa-results/report.md >> "$GITHUB_STEP_SUMMARY"; fi

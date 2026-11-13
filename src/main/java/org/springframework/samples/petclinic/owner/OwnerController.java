@@ -140,7 +140,9 @@ class OwnerController {
 
 	private Page<Owner> findPaginatedForOwnersLastName(int page, String lastname) {
 		int pageSize = 5;
-		int validatedPage = Math.max(page, 1);
+		// Spring Data JPA rejects query offsets above Integer.MAX_VALUE, so cap the
+		// page; a huge page number then gets the out-of-range redirect.
+		int validatedPage = Math.min(Math.max(page, 1), Integer.MAX_VALUE / pageSize);
 		Pageable pageable = PageRequest.of(validatedPage - 1, pageSize);
 		return owners.findByLastNameStartingWith(lastname, pageable);
 	}

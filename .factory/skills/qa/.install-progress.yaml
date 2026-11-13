@@ -1,0 +1,33 @@
+# Answers from the install-qa questionnaire, saved so a later run can resume.
+# Re-running install-qa re-asks every category and uses these as defaults.
+updated: "2026-11-13"
+platform: github
+categories:
+  default_target:
+    status: answered
+    target: local # server started from the checked-out branch; no hosted environments exist
+    databases: h2-only
+  personas:
+    status: auto-detected
+    note: No authentication or roles in the app, so one anonymous "visitor" persona.
+  critical_flows:
+    status: answered
+    answer: use all 12 flows as listed (web W1-W9, API A1-A3)
+  external_services:
+    status: skipped
+    note: No payment, email, SMS or other SaaS integrations detected.
+  cleanup:
+    status: auto-detected
+    strategy: reset-db # H2 is in memory; stopping the app discards QA data
+  imagemagick:
+    status: auto-detected
+    value: true
+  ci_integration:
+    status: answered
+    workflow: github-actions
+    mode: informational # does not block merge
+    video_evidence: false
+    compose: false
+  failure_learning:
+    status: answered
+    value: suggest_in_report

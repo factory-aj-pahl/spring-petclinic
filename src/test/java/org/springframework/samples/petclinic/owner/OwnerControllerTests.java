@@ -19,6 +19,7 @@ package org.springframework.samples.petclinic.owner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.Page;
@@ -33,6 +34,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
@@ -185,6 +187,16 @@ class OwnerControllerTests {
 				.andExpect(status().is3xxRedirection())
 				.andExpect(redirectedUrl("/owners?page=1&lastName=Franklin"));
 		}
+	}
+
+	@Test
+	void processFindFormKeepsQueryOffsetWithinIntRangeForHugePageNumbers() throws Exception {
+		mockMvc.perform(get("/owners").param("page", Integer.toString(Integer.MAX_VALUE)).param("lastName", "Franklin"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/owners?page=1&lastName=Franklin"));
+		ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
+		verify(this.owners).findByLastNameStartingWith(eq("Franklin"), pageable.capture());
+		assertThat(pageable.getValue().getOffset()).isLessThanOrEqualTo(Integer.MAX_VALUE);
 	}
 
 	@Test

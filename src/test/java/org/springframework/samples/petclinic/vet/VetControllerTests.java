@@ -23,6 +23,7 @@ import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.aot.DisabledInAotMode;
@@ -35,6 +36,8 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -98,6 +101,22 @@ class VetControllerTests {
 				.andExpect(status().is3xxRedirection())
 				.andExpect(redirectedUrl("/vets.html?page=1"));
 		}
+	}
+
+	@Test
+	void showVetListRedirectsOutOfRangePagesWithoutQueryingThem() throws Exception {
+		for (int page : List.of(0, 2, 429496731, Integer.MAX_VALUE)) {
+			mockMvc.perform(get("/vets.html").param("page", Integer.toString(page)))
+				.andExpect(status().is3xxRedirection())
+				.andExpect(redirectedUrl("/vets.html?page=1"));
+		}
+		verify(this.vets, never()).findAll(any(Pageable.class));
+	}
+
+	@Test
+	void showVetListQueriesTheRequestedPage() throws Exception {
+		mockMvc.perform(get("/vets.html").param("page", "1")).andExpect(status().isOk());
+		verify(this.vets).findAll(PageRequest.of(0, 5));
 	}
 
 	@Test
