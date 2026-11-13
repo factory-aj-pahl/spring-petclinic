@@ -52,7 +52,7 @@ Outbound network calls: none (Confirmed). `src/main` has no HTTP client, mail, m
 | Maven | 3.9.16 (wrapper 3.3.4) | `.mvn/wrapper/maven-wrapper.properties` | Confirmed | |
 | Gradle | 9.5.1 | `gradle/wrapper/gradle-wrapper.properties` | Confirmed | |
 | Spring Boot parent and Gradle plugin | 4.1.2 | `pom.xml`, `build.gradle` | Confirmed | Manages almost every library version below. |
-| Docker with Compose v2 | Any recent | Needed by `MySqlIntegrationTests`, `PostgresIntegrationTests`, `PostgresOutageIntegrationTests` | Confirmed | Without Docker none of them fails: the MySQL tests show as skipped and `PostgresIntegrationTests` is not counted (F9 in `docs/RUNBOOK.md`). |
+| Docker with Compose v2 | Any recent | Needed by `MySqlIntegrationTests`, `PostgresIntegrationTests`, `PostgresOutageIntegrationTests` | Confirmed | Before Docker was installed, the build passed with the MySQL tests shown as skipped and `PostgresIntegrationTests` not counted (F9 in `docs/RUNBOOK.md`). `PostgresOutageIntegrationTests` uses the same `disabledWithoutDocker` setting as the MySQL tests, so it should be skipped too (inferred; not run without Docker). |
 | Checkstyle 12.3.1 with nohttp 0.0.11 | | `pom.xml`, `build.gradle` | Confirmed | Scans every file in the repository and fails the build on `http://` links other than localhost. |
 | spring-javaformat 0.0.47 | | `pom.xml`, `build.gradle` | Confirmed | `./mvnw spring-javaformat:apply` fixes formatting. |
 | JaCoCo 0.8.15 | | `pom.xml` | Confirmed | Coverage report in `target/site/jacoco`. |
@@ -66,13 +66,13 @@ Outbound network calls: none (Confirmed). `src/main` has no HTTP client, mail, m
 
 | Item | Defined in | Status | Notes |
 |------|------------|--------|-------|
-| GitHub Actions `actions/checkout@v4`, `actions/setup-java@v4` (Temurin JDK 17), `gradle/actions/setup-gradle@v4`, `helm/kind-action@v1` | `.github/workflows/*.yml` | Confirmed | The kind workflow runs only when `k8s/**` changes, and it deploys the Docker Hub image, not the code under review. |
-| OSV-Scanner action, Dependabot | `.github/workflows/osv-scanner.yml`, `.github/dependabot.yml` | Confirmed | Keep this file current, see below. |
+| GitHub Actions `actions/checkout@v4`, `actions/setup-java@v4` (Temurin JDK 17), `gradle/actions/setup-gradle@v4`, `helm/kind-action@v1` | `.github/workflows/*.yml` | Inferred | The workflows have not run in this repository yet, and this branch changed their settings. The kind workflow runs only when `k8s/**` changes, and it deploys the Docker Hub image, not the code under review. |
+| OSV-Scanner action, Dependabot | `.github/workflows/osv-scanner.yml`, `.github/dependabot.yml` | Inferred | Neither has run in GitHub yet. OSV-Scanner 2.7.1, the version the workflow uses, found no issues locally in `pom.xml` and the SBOM. Keep this file current, see below. |
 | QA check: Droid CLI (latest, from `https://app.factory.ai/cli`), `agent-browser` 0.43.0 with Chrome, `actions/setup-node@v4` (Node 22), `actions/upload-artifact@v4` | `.github/workflows/qa.yml` | Inferred | Runs on pull requests to `main`, except those that change only `droid-wiki/`; it has not run in GitHub Actions yet. Needs the `FACTORY_API_KEY` secret. Droid sends the code it reads and the test output to Factory's API. Informational, not a required check. The Droid CLI version is not pinned. |
 | Wiki refresh: Droid CLI (latest, from `https://app.factory.ai/cli`), `peter-evans/create-pull-request` v8.1.1 (pinned to its commit), `actions/upload-artifact@v4`, `actions/download-artifact@v4` | `.github/workflows/droid-wiki-refresh.yml` | Inferred | Runs on pushes to `main`; it has not run in GitHub Actions yet. Needs the `FACTORY_API_KEY` and `FACTORY_WIKI_PR_TOKEN` secrets. Droid sends the code it reads to Factory's API. The pages stay in the repository and are not uploaded. |
 | Droid plugin `droid-control` from the `Factory-AI/factory-plugins` marketplace | `.factory/settings.json` | Confirmed | Drives the browser for the QA skill (`.factory/skills/qa*`). Not pinned: Droid installs the current version. |
 | Droid hook, Python 3 | `.factory/hooks.json`, `.factory/hooks/guard_release_actions.py` | Confirmed | Stops Droid from merging, deploying or pushing to `main`. Tested by `.factory/hooks/test_guard_release_actions.py` and in a live Droid session. |
-| DCO sign-off | `.github/dco.yml` | Confirmed | Every commit needs a `Signed-off-by` trailer. |
+| DCO sign-off | `.github/dco.yml` | Inferred | The DCO app checks pull requests for a `Signed-off-by` trailer, but `require.members: false` exempts members of the GitHub organization. Whether the app is installed on this repository is unknown. Every commit on this branch is signed off. |
 | Dev container | `.devcontainer/devcontainer.json` | Inferred | Uses Java 21 (Oracle) while CI uses 17. Not exercised here. |
 | Gitpod | `.gitpod.yml`, `.devcontainer/Dockerfile` | Inferred | Based on `mcr.microsoft.com/vscode/devcontainers/java:0-17-bullseye` with Java 17.0.7. Not exercised here. |
 
