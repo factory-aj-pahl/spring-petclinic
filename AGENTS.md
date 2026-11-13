@@ -39,9 +39,10 @@ say which tests were skipped instead of counting them as passed.
   `./mvnw spring-javaformat:apply` before you commit Java changes.
 - Plain HTTP links: the nohttp Checkstyle rule rejects `http://` URLs in the files it scans,
   Markdown included. Use `https://`.
-- Translations: `I18nPropertiesSyncTest` fails when a template or controller contains hard-coded
-  text instead of a message key, or when a key is missing from one of the `messages*.properties`
-  files.
+- Translations: `I18nPropertiesSyncTest` fails when a template has literal text between HTML tags
+  instead of a message key, or when a translation lacks a key that `messages.properties` has. It
+  does not check Java code or text passed to a fragment as an argument, so use message keys there
+  too (F19 in [the runbook](docs/RUNBOOK.md#follow-ups)).
 - Patched versions: `PatchedDependencyVersionsTests` fails when a library resolves below the first
   version that fixed a known advisory. Do not lower those minimums to get another change through.
 
@@ -50,8 +51,9 @@ say which tests were skipped instead of counting them as passed.
 - For a bug fix, first write a test that fails, then fix the code.
 - When you add, remove or upgrade a dependency or an external service, update
   `docs/DEPENDENCIES.md`. When operations change, update `docs/RUNBOOK.md` too.
-- Sign off every commit with `git commit -s`. The repository requires a Developer Certificate of
-  Origin sign-off (`.github/dco.yml`).
+- Sign off every commit with `git commit -s`. `.github/dco.yml` configures the DCO app, which checks
+  pull requests for a Developer Certificate of Origin sign-off. Its `require.members: false` setting
+  exempts members of the GitHub organization; sign off anyway.
 - Keep each commit to one purpose and explain the reason in the message.
 - Do not edit `droid-wiki/` by hand. The Droid Wiki Refresh workflow regenerates it after pushes to
   `main` (see [the runbook](docs/RUNBOOK.md#wiki-refresh)).

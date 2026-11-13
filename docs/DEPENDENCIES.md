@@ -19,7 +19,7 @@ Last reviewed: 2026-11-13, on Spring Boot 4.1.2.
 | H2 2.4.240, in-memory | Default profile | `application.properties` (`database=h2`), `db/h2/*.sql` | Confirmed | Every `@SpringBootTest` test runs on it. |
 | MySQL 9.7 | `mysql` profile | `application-mysql.properties`, `docker-compose.yml` service `mysql`, `db/mysql/*.sql` | Confirmed | `MySqlIntegrationTests` (Testcontainers `mysql:9.7`). `docker compose up mysql` plus the `mysql` profile serves `/owners`. |
 | PostgreSQL 18.4 | `postgres` profile and Kubernetes | `application-postgres.properties`, `docker-compose.yml` service `postgres`, `k8s/db.yml`, `db/postgres/*.sql` | Confirmed | `PostgresIntegrationTests` (Docker Compose), `PostgresOutageIntegrationTests` (Testcontainers `postgres:18.4`). |
-| Caffeine 3.2.4, in-process cache `vets` | Always | `@Cacheable("vets")` in `VetRepository` | Confirmed | `/actuator/caches` reports a `CaffeineCacheManager`. During a database outage `/vets` is still served from this cache. |
+| Caffeine 3.2.4, in-process cache `vets` | Always | `@Cacheable("vets")` in `VetRepository` | Confirmed | `/actuator/caches` reports a `CaffeineCacheManager`. During a database outage `/vets` is still served from this cache. No size limit or expiry is configured, so `/vets.html` checks the page range before its cached query (F15 in `docs/RUNBOOK.md`). |
 | Bootstrap 5.3.8 and Font Awesome 4.7.0 webjars | Always, served from the jar | `pom.xml` properties | Confirmed | Templates load them from `/webjars/`. No CDN links in the templates. |
 | Spring Boot Actuator, all endpoints exposed | Always | `management.endpoints.web.exposure.include=*` | Confirmed | A live run serves `env`, `beans`, `threaddump`, `sbom` and the other endpoints without authentication. See the follow-ups in `docs/RUNBOOK.md`. |
 
@@ -40,9 +40,9 @@ Outbound network calls: none (Confirmed). `src/main` has no HTTP client, mail, m
 |------|------------|--------|-------|
 | Kubernetes Deployment `petclinic`, image `dsyer/petclinic` with no tag | `k8s/petclinic.yml` | Unknown | No workflow builds or pushes this image. Who builds it, from which commit and with which dependency versions is unknown, so the 4.1.2 fix does not reach Kubernetes until the image is rebuilt. |
 | Database credentials through service binding (`SERVICE_BINDING_ROOT=/bindings`, Secret `demo-db` of type `servicebinding.io/postgresql`) | `k8s/petclinic.yml`, `k8s/db.yml` | Inferred | Spring Boot does not read `/bindings` by itself. This works only if the image contains Spring Cloud Bindings, which Paketo buildpacks add during `./mvnw spring-boot:build-image`. Neither build file declares it. |
-| PostgreSQL 18.4 Deployment `demo-db` | `k8s/db.yml` | Confirmed | No volume, so data is lost when the pod restarts. Credentials `user` / `pass` are in plain text in the manifest. |
+| PostgreSQL 18.4 Deployment `demo-db` | `k8s/db.yml` | Confirmed | No volume, so data is lost when the pod restarts. The database credentials are in plain text in the manifest (F5 in `docs/RUNBOOK.md`). |
 | Probes `/livez` and `/readyz` | `k8s/petclinic.yml` | Confirmed | These paths exist only when `management.endpoint.health.probes.add-additional-paths=true`, which the manifest sets. The readiness group does not include the database (`PostgresOutageIntegrationTests`). |
-| Container image build | `./mvnw spring-boot:build-image` | Inferred | There is no Dockerfile. The buildpack builder chooses the base image and JRE. |
+| Container image build | `./mvnw spring-boot:build-image` | Inferred | There is no Dockerfile for the application (`.devcontainer/Dockerfile` is the Gitpod workspace image). The buildpack builder chooses the base image and JRE. |
 
 ## Build and test toolchain
 
@@ -52,7 +52,7 @@ Outbound network calls: none (Confirmed). `src/main` has no HTTP client, mail, m
 | Maven | 3.9.16 (wrapper 3.3.4) | `.mvn/wrapper/maven-wrapper.properties` | Confirmed | |
 | Gradle | 9.5.1 | `gradle/wrapper/gradle-wrapper.properties` | Confirmed | |
 | Spring Boot parent and Gradle plugin | 4.1.2 | `pom.xml`, `build.gradle` | Confirmed | Manages almost every library version below. |
-| Docker with Compose v2 | Any recent | Needed by `MySqlIntegrationTests`, `PostgresIntegrationTests`, `PostgresOutageIntegrationTests` | Confirmed | Without Docker these tests are skipped, not failed. |
+| Docker with Compose v2 | Any recent | Needed by `MySqlIntegrationTests`, `PostgresIntegrationTests`, `PostgresOutageIntegrationTests` | Confirmed | Without Docker none of them fails: the MySQL tests show as skipped and `PostgresIntegrationTests` is not counted (F9 in `docs/RUNBOOK.md`). |
 | Checkstyle 12.3.1 with nohttp 0.0.11 | | `pom.xml`, `build.gradle` | Confirmed | Scans every file in the repository and fails the build on `http://` links other than localhost. |
 | spring-javaformat 0.0.47 | | `pom.xml`, `build.gradle` | Confirmed | `./mvnw spring-javaformat:apply` fixes formatting. |
 | JaCoCo 0.8.15 | | `pom.xml` | Confirmed | Coverage report in `target/site/jacoco`. |
