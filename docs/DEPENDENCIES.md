@@ -140,7 +140,7 @@ The repository cannot answer these questions, so they are Unknown. Someone who r
 
 | Question | Why it matters | Where it shows up |
 |----------|----------------|-------------------|
-| Who owns the service and reviews changes to it? | No CODEOWNERS file names an owner, and branch protection on `main` could not be checked (F13 in `docs/RUNBOOK.md`). | `.github/` |
+| Who owns the service and reviews changes to it? | No CODEOWNERS file names an owner, and nothing requires a review before a merge to `main` (F13 in `docs/RUNBOOK.md`). | `.github/` |
 | Who builds the `dsyer/petclinic` image, and from which commit? | The 4.1.2 fix reaches Kubernetes only through a rebuilt image (F4). | `k8s/petclinic.yml` |
 | Where does the application run in production, and how are TLS, database backups and secrets handled there? | The repository has no production configuration: no `server.ssl.*` property, no backup job and no secret store. `k8s/` is a demo setup (F5). | `src/main/resources/application.properties`, `k8s/` |
 | Who calls `/vets` and the Actuator endpoints? | Restricting Actuator (F1) or changing the `/vets` formats could break a caller that the repository does not know about. | `src/main/java/org/springframework/samples/petclinic/vet/VetController.java`, `src/main/resources/application.properties` |
