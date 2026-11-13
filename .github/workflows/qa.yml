@@ -5,9 +5,10 @@
 # Informational only: this check does not block merging. Do not add it to the required status
 # checks of the main branch.
 #
-# Needs the FACTORY_API_KEY repository secret, and the same Dependabot secret for Dependabot
-# pull requests. Without it, the report comment says that QA did not run. QA_EVIDENCE_TOKEN is
-# only used when video_evidence is true in .factory/skills/qa/config.yaml.
+# Needs the FACTORY_API_KEY repository secret. Without it, the report comment says that QA did not
+# run. Dependabot pull requests read Dependabot secrets instead; a key added there is available to
+# the updated libraries during the build (F21 in docs/RUNBOOK.md). QA_EVIDENCE_TOKEN is only used
+# when video_evidence is true in .factory/skills/qa/config.yaml.
 name: QA
 
 on:
@@ -54,7 +55,7 @@ jobs:
           # shellcheck disable=SC2016
           printf '%s\n' '## QA Report' '' \
             ':no_entry: QA did not run: the `FACTORY_API_KEY` secret is not available to this workflow run.' '' \
-            'Add it as a repository secret under Settings > Secrets and variables > Actions. Dependabot pull requests read Dependabot secrets, so add it there too to test them.' \
+            'Add it as a repository secret under Settings > Secrets and variables > Actions. Dependabot pull requests read Dependabot secrets; see F21 in docs/RUNBOOK.md before adding it there.' \
             > qa-results/report.md
 
       - name: Read QA settings

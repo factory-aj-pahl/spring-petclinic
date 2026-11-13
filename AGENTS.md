@@ -70,4 +70,5 @@ Do not:
 
 For Droid, `.factory/hooks.json` enforces these rules: `.factory/hooks/guard_release_actions.py`
 blocks the commands before they run. The hook matches command text, so it is a guardrail and not a
-security boundary. Branch protection on `main` is still needed.
+security boundary: it checks only commands that Droid runs with its Execute tool, and it lets a
+command through when it cannot read the hook input. Branch protection on `main` is still needed.
