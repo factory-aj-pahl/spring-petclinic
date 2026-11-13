@@ -1,6 +1,6 @@
 # Raw evidence
 
-The evidence archive holds the raw output behind this package: build and test logs, JUnit reports, coverage reports, scan results, probe output, QA reports and screenshots, and the scripts that produced them. It has 592 files and about 21 MB of generated output, so it is not in the repository. It is delivered as the `evidence/` folder of `spring-petclinic-evaluation.zip`, next to a copy of the Markdown files in this directory.
+The evidence archive holds the raw output behind this package: build and test logs, JUnit reports, coverage reports, scan results, probe output, QA reports and screenshots, and the scripts that produced them. It has 592 files and about 21 MB of generated output, so its files are not committed one by one. The archive is the `evidence/` folder of `spring-petclinic-evaluation.zip`, which is committed in this directory. The zip also holds a copy of the Markdown files in this directory, the presentation for the review and the wiki.
 
 To check that an archive matches this package, run this in its `evidence/` folder:
 

@@ -1,6 +1,6 @@
 # Evidence package
 
-This package records what Factory Droid observed, inferred, changed and tested while it fixed the known dependency vulnerabilities in Spring PetClinic, what it could not complete, and what it submitted for approval. A reviewer should be able to decide on the pull request from this package without rerunning the session. Each statement names its evidence. Paths that start with `raw/` or `scripts/` refer to the evidence archive that accompanies this package. [raw-evidence.md](raw-evidence.md) describes its files, and `raw-evidence.sha256` holds their SHA-256 checksums.
+This package records what Factory Droid observed, inferred, changed and tested while it fixed the known dependency vulnerabilities in Spring PetClinic, what it could not complete, and what it submitted for approval. A reviewer should be able to decide on the pull request from this package without rerunning the session. Each statement names its evidence. Paths that start with `raw/` or `scripts/` refer to the evidence archive, the `evidence/` folder of `spring-petclinic-evaluation.zip` in this directory. [raw-evidence.md](raw-evidence.md) describes its files, and `raw-evidence.sha256` holds their SHA-256 checksums.
 
 | Item | Value |
 |------|-------|
@@ -29,7 +29,7 @@ This package records what Factory Droid observed, inferred, changed and tested w
 3. Decide F21 (whether Dependabot pull requests get `FACTORY_API_KEY`) and F22 (add `permissions: contents: read` to three workflows). Neither was put to the approver during the session.
 4. Protect `main` and add a CODEOWNERS file (F13). For this private repository, that needs a paid GitHub plan.
 5. Rebuild and redeploy the Kubernetes image if Kubernetes matters (F4). Nothing was deployed.
-6. Keep `docs/evidence/` on `main`, or leave its commits out when merging. The application does not need it.
+6. Keep `docs/evidence/`, including its zip, on `main`, or leave its commits out when merging. The application does not need it.
 
 The other follow-ups (F1 to F12, F14 and F16 to F20) are in `docs/RUNBOOK.md`. Each needs an owner decision, and none of them blocks this fix.
 
@@ -90,7 +90,7 @@ cp src/test/java/org/springframework/samples/petclinic/PatchedDependencyVersions
 git worktree remove --force /tmp/guard-check
 ```
 
-The code was tested in the sandbox at commit `407b5f3`. Later commits change only Markdown files and the checksum list under `docs/`, as `git diff --stat 407b5f3..HEAD` shows. GitHub's checks ran on the pull request at `c85ae9e` ([testing.md](testing.md#github-checks-on-the-pull-request)).
+The code was tested in the sandbox at commit `407b5f3`. Later commits change only Markdown files and the checksum list under `docs/`, and add `docs/evidence/spring-petclinic-evaluation.zip`, as `git diff --stat 407b5f3..HEAD` shows. GitHub's checks ran on the pull request at `c85ae9e` ([testing.md](testing.md#github-checks-on-the-pull-request)).
 
 ## Files
 
@@ -104,3 +104,4 @@ The code was tested in the sandbox at commit `407b5f3`. Later commits change onl
 | [timeline.md](timeline.md) | Timeline, human effort and time to a reviewable fix |
 | [approval-record.md](approval-record.md) | Every decision put to the approver, and what was done under it |
 | [raw-evidence.md](raw-evidence.md), `raw-evidence.sha256` | The raw evidence files and their checksums |
+| `spring-petclinic-evaluation.zip` | The presentation for the review, with the evidence archive, a copy of this package, the dependency documentation, the runbook and the wiki. Unzip it and open `presentation.html`. |

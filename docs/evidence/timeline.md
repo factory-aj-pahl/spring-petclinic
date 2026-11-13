@@ -44,11 +44,13 @@ All times are UTC on 2026-11-13. They come from the session transcript (`raw/ses
 
 After the checks, two commits that change only Markdown files and the checksum list under `docs/` recorded the pull request, its checks and the new archive files, and labeled the CI entries that the checks ran as Confirmed. The pull request description was updated to match. The pull request page shows the checks for those commits.
 
+After the package was delivered, the user asked for the zip with the presentation and the evidence archive to be added to the pull request. Two more commits did that: one updated these files to describe the zip, and one added `spring-petclinic-evaluation.zip` to this directory.
+
 ## Human effort
 
 | Measure | Value |
 |---------|-------|
-| Messages from the user | 1, the request |
+| Messages from the user | 1, the request. After the package was delivered, a second message asked for the zip to be added to the pull request. |
 | Question prompts answered | 8 prompts with 19 multiple-choice questions. One answer was typed as text: the correction of the repository name. |
 | Work outside the session | 1 task: creating the repository `factory-aj-pahl/spring-petclinic` and giving the agent access |
 | Code, tests or documentation written by a person | None |
