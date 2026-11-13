@@ -90,6 +90,7 @@ The other follow-ups are in `docs/RUNBOOK.md`, each with its evidence.
 | At 13:12:52, `factory-aj-pahl/spring-petclinic` was private and empty, and the account had admin access. | Session ([approval-record.md](approval-record.md)) |
 | After the one-time seed push, `main` is `500158f` and reports `protected: false`. GitHub refuses rulesets: "Upgrade to GitHub Pro or make this repository public to enable this feature." The branch protection, Actions permissions and secrets endpoints answer HTTP 403, "Resource not accessible by integration". | `raw/seed-main/push.log`, `raw/seed-main/repo-settings.txt` |
 | The seed push started the upstream Maven and Gradle workflows on `main`. Both passed, so GitHub Actions runs in this repository. | `raw/github/runs-after-seed.txt` |
+| On pull request #1, at `c85ae9e`, the Maven and Gradle builds, the OSV-Scanner pull request scan and the QA check passed. No DCO check ran. | `raw/github/pr-checks-c85ae9e.txt`, [testing.md](testing.md#github-checks-on-the-pull-request) |
 
 ## Policy enforcement
 

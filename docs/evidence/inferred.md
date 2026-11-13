@@ -8,7 +8,7 @@
 | Inferred | Follows from code or configuration, but nothing in this repository exercises it |
 | Unknown | The repository cannot answer it; someone outside the code has to |
 
-The tables with a status column hold 33 entries: 20 Confirmed, 12 Inferred and 1 Unknown. The 5 open questions below are Unknown too. Whether each advisory could be reached is a separate judgment, made by reading the code, and none was tested with an exploit: 8 not reachable, 1 not reachable by default, 1 unlikely and 10 unknown.
+The tables with a status column hold 35 entries: 23 Confirmed, 11 Inferred and 1 Unknown. Three of the Confirmed entries, the GitHub Actions of the build workflows, the OSV-Scanner action and the QA check, were Inferred until GitHub ran them on the pull request. The 5 open questions below are Unknown too. Whether each advisory could be reached is a separate judgment, made by reading the code, and none was tested with an exploit: 8 not reachable, 1 not reachable by default, 1 unlikely and 10 unknown.
 
 ## Inferences that matter for the decision
 
@@ -21,8 +21,8 @@ The tables with a status column hold 33 entries: 20 Confirmed, 12 Inferred and 1
 | `PostgresOutageIntegrationTests` is skipped on a machine without Docker. | It uses the same `disabledWithoutDocker` setting as `MySqlIntegrationTests`. | A build without Docker. The agent's attempt to simulate one was invalid ([not-completed.md](not-completed.md)). |
 | F17: on MySQL, two concurrent requests that add the same pet name give HTTP 500. | The MySQL unique constraint has no name, and `PetController` recognizes the violation by its name. | A concurrent test on MySQL |
 | F11: the jar from the Gradle build has no `git` or `build` section in `/actuator/info`. | `build.gradle` lacks the plugins that write them. | Running the Gradle jar |
-| The changed CI workflows work on GitHub. | They pass actionlint and GitHub's workflow schema (`raw/lint/workflow-lint.txt`), and the same commands pass locally. | The checks on the pull request |
-| The QA and wiki workflows work in GitHub Actions. | The QA skill passed locally in `droid exec` with the prompt that CI uses, and both workflows pass actionlint. The wiki workflow has never run. | Running them with the secrets set |
+| The changed kind workflow works on GitHub. | It passes actionlint and GitHub's workflow schema (`raw/lint/workflow-lint.txt`). The Maven, Gradle, OSV-Scanner and QA workflows passed on the pull request ([testing.md](testing.md#github-checks-on-the-pull-request)). | A change under `k8s/`, or a manual run |
+| The wiki workflow works in GitHub Actions. | The wiki skill ran locally, the workflow passes actionlint, and the `FACTORY_API_KEY` secret it needs is set, because the QA check ran. It has never run. | The next push to `main`, with `FACTORY_WIKI_PR_TOKEN` set |
 
 ## Open questions
 

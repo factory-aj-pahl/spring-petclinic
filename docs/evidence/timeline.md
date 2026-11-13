@@ -42,7 +42,7 @@ All times are UTC on 2026-11-13. They come from the session transcript (`raw/ses
 | 16:32:12 | Pull request #1 is opened, ready for review (decision 8). | `raw/github/pr-opened.txt` |
 | 16:32:19 to 16:41:38 | GitHub's checks on the pull request pass: OSV-Scanner, the Maven and Gradle builds, and QA with 20 of 20 test cases. | `raw/github/pr-checks-c85ae9e.txt`, `raw/github/qa-ci-run-43463692800/` |
 
-After the checks, a commit that changes only `docs/evidence/` added the pull request, its checks and the new archive files to this package, and the pull request description was updated to match. The pull request page shows the checks for that commit.
+After the checks, two commits that change only Markdown files and the checksum list under `docs/` recorded the pull request, its checks and the new archive files, and labeled the CI entries that the checks ran as Confirmed. The pull request description was updated to match. The pull request page shows the checks for those commits.
 
 ## Human effort
 

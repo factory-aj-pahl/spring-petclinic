@@ -90,6 +90,8 @@ The fix checks the page against the cached list of all vets first, and runs the 
 | `407b5f3` | Adds a blank line so that other Markdown renderers do not read a heading as a table row. |
 | `c6b60ff` | Records what the GitHub settings showed for F13 and F22, and removes a heap figure for F15 that did not measure the cache ([inferred.md](inferred.md#corrections)). |
 
+After the pull request was opened, the evidence commits also changed `docs/DEPENDENCIES.md`: GitHub's checks had run the GitHub Actions of the build workflows, the OSV-Scanner action and the QA check, so those entries are now Confirmed. The kind action and Dependabot have not run and got their own rows, which stay Inferred.
+
 What the documents contain:
 
 - `docs/DEPENDENCIES.md`: every runtime, deployment, build, CI and developer-environment dependency with a Confirmed, Inferred or Unknown label and its evidence; the resolved library versions; the 20 advisories with severity, fixed version and reachability; the open questions; and how to keep the file current.
