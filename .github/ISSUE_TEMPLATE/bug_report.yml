@@ -1,0 +1,42 @@
+name: Bug report
+description: Something in PetClinic does not work as expected.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: Include the URL or page, the error message, and a stack trace if there is one.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start the application with `./mvnw spring-boot:run`
+        2. Open /owners?page=2
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Commit or version
+      description: Output of `git rev-parse --short HEAD`, or the image tag you ran.
+  - type: dropdown
+    id: database
+    attributes:
+      label: Database
+      options:
+        - H2 (default)
+        - MySQL
+        - PostgreSQL
+    validations:
+      required: true

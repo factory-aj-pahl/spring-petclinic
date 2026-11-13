@@ -42,6 +42,9 @@ out/
 ### VS Code ###
 .vscode/
 
+### Python ###
+__pycache__/
+
 ### CSS ###
 _site/
 *.css

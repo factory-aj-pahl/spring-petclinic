@@ -1,0 +1,14 @@
+{
+  "PreToolUse": [
+    {
+      "matcher": "Execute",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "python3 \"$FACTORY_PROJECT_DIR\"/.factory/hooks/guard_release_actions.py",
+          "timeout": 15
+        }
+      ]
+    }
+  ]
+}
