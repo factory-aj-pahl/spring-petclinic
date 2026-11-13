@@ -145,6 +145,7 @@ The repository cannot answer these questions, so they are Unknown. Someone who r
 | Where does the application run in production, and how are TLS, database backups and secrets handled there? | The repository has no production configuration: no `server.ssl.*` property, no backup job and no secret store. `k8s/` is a demo setup (F5). | `src/main/resources/application.properties`, `k8s/` |
 | Who calls `/vets` and the Actuator endpoints? | Restricting Actuator (F1) or changing the `/vets` formats could break a caller that the repository does not know about. | `src/main/java/org/springframework/samples/petclinic/vet/VetController.java`, `src/main/resources/application.properties` |
 | What were `./conf.d` and `mysql-default-conf` meant for? | `docker-compose.yml` mounts a `./conf.d` directory that is not in the repository (F7), and `PetClinicRuntimeHints` registers a `mysql-default-conf` resource that does not exist. | `docker-compose.yml`, `src/main/java/org/springframework/samples/petclinic/PetClinicRuntimeHints.java` |
+
 ## Keeping this current
 
 - `PatchedDependencyVersionsTests` fails the build if any of the six libraries above resolves below its first fixed version. When a new advisory is fixed, add or raise the minimum there and add the advisory to the table above.
