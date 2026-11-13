@@ -1,0 +1,23 @@
+# Weekly dependency updates. Spring Boot manages most library versions, so a Spring Boot
+# update usually arrives as one pull request per build tool. Keep pom.xml and
+# build.gradle on the same version (see docs/RUNBOOK.md).
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns:
+          - "*"

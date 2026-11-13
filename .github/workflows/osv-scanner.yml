@@ -1,0 +1,42 @@
+# Checks dependencies against the OSV.dev vulnerability database.
+# Pull requests fail when they add a known vulnerability. Pushes to main and the weekly
+# run report every known vulnerability, including ones published after a dependency
+# was added.
+name: OSV-Scanner
+
+on:
+  pull_request:
+    branches: [ main ]
+  merge_group:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '30 6 * * 1'
+
+permissions:
+  # Required by the reusable workflows, see https://github.com/github/codeql-action/issues/2117
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  scan-pr:
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@v2.7.1
+    with:
+      # pom.xml is resolved with its transitive dependencies. Scanning it explicitly
+      # keeps example files elsewhere in the repository out of the result.
+      scan-args: |-
+        --lockfile=pom.xml
+      # Code scanning upload needs GitHub Advanced Security on private repositories.
+      # Findings still fail the job and appear in its log.
+      upload-sarif: false
+
+  scan-full:
+    if: github.event_name == 'push' || github.event_name == 'schedule'
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.7.1
+    with:
+      scan-args: |-
+        --lockfile=pom.xml
+      upload-sarif: false
