@@ -62,8 +62,10 @@ Our issue tracker is available [here](https://github.com/spring-projects/spring-
 ## Database configuration
 
 In its default configuration, Petclinic uses an in-memory database (H2) which
-gets populated at startup with data. The h2 console is exposed at `http://localhost:8080/h2-console`,
-and it is possible to inspect the content of the database using the `jdbc:h2:mem:<uuid>` URL. The UUID is printed at startup to the console.
+gets populated at startup with data. The H2 console is not included: since Spring Boot 4 it is a separate module.
+To use it during local development, add the `org.springframework.boot:spring-boot-h2console` dependency.
+Spring Boot Devtools turns the console on under `./mvnw spring-boot:run`; when you run the jar, also set `spring.h2.console.enabled=true`.
+The console is then at `http://localhost:8080/h2-console`, and you can inspect the database with the `jdbc:h2:mem:<uuid>` URL printed at startup.
 
 A similar setup is provided for MySQL and PostgreSQL if a persistent database configuration is needed. Note that whenever the database type changes, the app needs to run with a different profile: `spring.profiles.active=mysql` for MySQL or `spring.profiles.active=postgres` for PostgreSQL. See the [Spring Boot documentation](https://docs.spring.io/spring-boot/how-to/properties-and-configuration.html#howto.properties-and-configuration.set-active-spring-profiles) for more detail on how to set the active profile.
 
@@ -94,9 +96,14 @@ or
 docker compose up postgres
 ```
 
+## Dependencies and operations
+
+- [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) lists the runtime, build and CI dependencies, how sure we are about each one, and the advisories fixed by the Spring Boot 4.1.2 upgrade.
+- [docs/RUNBOOK.md](docs/RUNBOOK.md) covers building, running, health checks, failure behavior, vulnerability scanning, upgrades, rollback and open follow-ups.
+
 ## Test Applications
 
-At development time we recommend you use the test applications set up as `main()` methods in `PetClinicIntegrationTests` (using the default H2 database and also adding Spring Boot Devtools), `MySqlTestApplication` and `PostgresIntegrationTests`. These are set up so that you can run the apps in your IDE to get fast feedback and also run the same classes as integration tests against the respective database. The MySql integration tests use Testcontainers to start the database in a Docker container, and the Postgres tests use Docker Compose to do the same thing.
+At development time we recommend you use the test applications set up as `main()` methods in `PetClinicIntegrationTests` (using the default H2 database and also adding Spring Boot Devtools), `MysqlTestApplication` and `PostgresIntegrationTests`. These are set up so that you can run the apps in your IDE to get fast feedback and also run the same classes as integration tests against the respective database. The MySql integration tests use Testcontainers to start the database in a Docker container, and the Postgres tests use Docker Compose to do the same thing.
 
 ## Compiling the CSS
 
