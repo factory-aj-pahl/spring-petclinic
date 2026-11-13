@@ -45,6 +45,10 @@ out/
 ### Python ###
 __pycache__/
 
+### QA skill output ###
+qa-results/
+qa-output.txt
+
 ### CSS ###
 _site/
 *.css

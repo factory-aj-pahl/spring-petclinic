@@ -15,7 +15,7 @@ Requirements: JDK 17 or newer. Docker with Compose v2 for the MySQL and PostgreS
 
 `./mvnw verify` takes about one minute on 4 CPUs. Without Docker, the MySQL tests show as skipped and the PostgreSQL tests are not counted at all, so the build still passes with fewer tests. Check the test count when it matters: 114 tests run with Docker.
 
-The nohttp check scans every file in the repository, including untracked ones, and fails on `http://` links other than localhost. Use `https://` links.
+The nohttp check scans every file in the repository, including untracked ones (build output and `qa-results/` excepted), and fails on `http://` links other than localhost. Use `https://` links.
 
 ## Run locally
 
@@ -62,6 +62,16 @@ osv-scanner scan source -L target/classes/META-INF/sbom/application.cdx.json
 ```
 
 The first scan resolves the dependency tree from `pom.xml`, the second checks what the jar actually contains. Both report `No issues found` today. The same scan runs on every pull request (`.github/workflows/osv-scanner.yml`), and Dependabot proposes updates weekly.
+
+## QA check on pull requests
+
+`.github/workflows/qa.yml` runs the Droid QA skill on every pull request to `main`. Droid builds the branch, starts it on the runner with the in-memory H2 database, uses the pages and endpoints that the diff can affect, and keeps one QA report comment on the pull request up to date. A pull request that changes only documentation, CI or tests gets an INCONCLUSIVE report, because no application code changed.
+
+- The check is informational. Do not make it a required status check.
+- It needs the `FACTORY_API_KEY` repository secret. Without the secret, the report comment says that QA did not run. Dependabot pull requests read Dependabot secrets, so add the key there as well. Pull requests from forks get no secrets, so the job is skipped for them.
+- The full report, screenshots and the server log are in the `qa-results-<run id>-<attempt>` artifact of the workflow run for 14 days.
+- To run QA locally, start Droid in the repository and ask it to run the `qa` skill. Results go to `qa-results/<run id>/`, which Git and the nohttp check ignore.
+- The flows and their pass criteria are in `.factory/skills/qa-web/SKILL.md` (pages, through a real browser) and `.factory/skills/qa-api/SKILL.md` (JSON and Actuator endpoints, through curl). Settings, such as video evidence, are in `.factory/skills/qa/config.yaml`.
 
 ## Upgrade Spring Boot to fix an advisory
 

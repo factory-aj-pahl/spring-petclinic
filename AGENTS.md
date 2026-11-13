@@ -27,6 +27,7 @@ Use JDK 17. CI builds with Temurin 17.
 | Run the application on port 8080 | `./mvnw spring-boot:run` |
 | Test the Droid hook | `python3 -B -m unittest discover -s .factory/hooks` |
 | Scan dependencies for known vulnerabilities | See [the runbook](docs/RUNBOOK.md#check-dependencies-for-known-vulnerabilities) |
+| Test the running application like a user (QA) | Run the `qa` skill. See [the runbook](docs/RUNBOOK.md#qa-check-on-pull-requests) |
 
 `./mvnw verify` takes about a minute. `MySqlIntegrationTests`, `PostgresIntegrationTests` and
 `PostgresOutageIntegrationTests` need Docker and are skipped without it. When you report results,

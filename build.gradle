@@ -77,6 +77,11 @@ checkstyleNohttp {
   configFile = file('src/checkstyle/nohttp-checkstyle.xml')
 }
 
+nohttp {
+  // Output of local QA runs, ignored by Git.
+  source.exclude 'qa-results/**'
+}
+
 tasks.named("formatMain").configure { dependsOn("checkstyleMain") }
 tasks.named("formatMain").configure { dependsOn("checkstyleNohttp") }
 
