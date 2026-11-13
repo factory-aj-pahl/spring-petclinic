@@ -37,8 +37,12 @@ All times are UTC on 2026-11-13. They come from the session transcript (`raw/ses
 | 15:44:09 to 15:44:14 | The one-time push of `500158f` to `main` (decision 7). | `raw/seed-main/push.log` |
 | 15:45 to 15:49 | The upstream Maven and Gradle workflows pass on `main`. | `raw/github/runs-after-seed.txt` |
 | 15:48:00 | `c6b60ff`, the last commit before this package. | `git log` |
+| 16:30:25 | The evidence package is committed: `c85ae9e`. | `git log` |
+| 16:31:54 to 16:31:57 | The agent pushes the feature branch. `main` stays at `500158f`. | `raw/github/push-branch.log` |
+| 16:32:12 | Pull request #1 is opened, ready for review (decision 8). | `raw/github/pr-opened.txt` |
+| 16:32:19 to 16:41:38 | GitHub's checks on the pull request pass: OSV-Scanner, the Maven and Gradle builds, and QA with 20 of 20 test cases. | `raw/github/pr-checks-c85ae9e.txt`, `raw/github/qa-ci-run-43463692800/` |
 
-The evidence package, the push of the branch and the pull request came after 15:48. Their times are in [approval-record.md](approval-record.md), in the action for decision 8.
+After the checks, a commit that changes only `docs/evidence/` added the pull request, its checks and the new archive files to this package, and the pull request description was updated to match. The pull request page shows the checks for that commit.
 
 ## Human effort
 
@@ -64,6 +68,7 @@ Still to do for people: review and merge the pull request, and the decisions lis
 | Fix with its guard and failure-scenario tests, `23d0c67` | 03:54:03 | 58 minutes |
 | Readiness fixes, documentation and hook, `f9bbb32` | 04:22:51 | 1 hour 27 minutes |
 | The repository can receive the branch | 13:17:37 | 10 hours 22 minutes, mostly the overnight wait |
-| Pull request opened | See [approval-record.md](approval-record.md), the action for decision 8 | |
+| Pull request opened, ready for review | 16:32:12 | 13 hours 36 minutes |
+| GitHub's checks on the pull request pass | 16:41:38 | 13 hours 46 minutes |
 
 The fix and its tests were reviewable 58 minutes after the request, but there was nowhere to push them: the upstream repository is read-only for this account, and the agent could not create a repository. Once the repository was ready, the agent finished the QA skill, the wiki and the evidence before opening the pull request, so that the reviewer would get one complete pull request. If the time to a reviewable fix matters most, the pull request can be opened as soon as the fix and its tests pass, with the rest added as later commits.

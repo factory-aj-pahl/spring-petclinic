@@ -3,7 +3,7 @@
 Approver: the session user (GitHub account factory-aj-pahl), answering in the Factory session
 Session: 5f856a0b-6321-404e-bcb7-7b7183376551
 
-The agent asked for every decision below with its AskUser tool and waited for the answer before acting on it. Times are UTC on 2026-11-13 and come from the session transcript: when the question was shown and when the answer arrived. This record was written at 03:10:17 (decisions 1 to 4), 03:45:44 (decisions 5 and 6), 13:58:58 (the correction to decisions 2 and 5, and decisions 7 to 10) and 14:54:09 (decisions 11 and 12). At 16:16, decision 10 was rewritten to quote the answers as given, and the action for decision 7 was added.
+The agent asked for every decision below with its AskUser tool and waited for the answer before acting on it. Times are UTC on 2026-11-13 and come from the session transcript: when the question was shown and when the answer arrived. This record was written at 03:10:17 (decisions 1 to 4), 03:45:44 (decisions 5 and 6), 13:58:58 (the correction to decisions 2 and 5, and decisions 7 to 10) and 14:54:09 (decisions 11 and 12). At 16:16, decision 10 was rewritten to quote the answers as given, and the action for decision 7 was added. After the pull request was opened, the action for decision 8 was added, with the checks that GitHub ran on it.
 
 | # | Asked → answered | Decision requested | Human answer |
 |---|---|---|---|
@@ -40,4 +40,4 @@ Not put to the approver: F21 and F22 came from a final review of the workflows a
 | 11 | Fixed in `0e8563f`. Its tests failed before the change (2 failures) and pass after it | 14:48:30 | `docs/evidence/testing.md` |
 | 12 | Recorded F16 to F20 in `docs/RUNBOOK.md` (`2aff817`). No code change | 14:54:21 | `docs/RUNBOOK.md` |
 | 7 | Pushed the unchanged upstream commit `500158f` to `main` of `factory-aj-pahl/spring-petclinic` once, with `work/seed-main.sh` (in the evidence archive as `scripts/seed-main.sh`). The push created `main`; afterwards the remote had only `refs/heads/main` at `500158f`. No other push to `main` | 15:44:09 to 15:44:14 | `raw/seed-main/push.log`, `raw/seed-main/repo-settings.txt` |
-| 8 | Pending | | |
+| 8 | Pushed the branch `security/spring-boot-4.1.2-cve-remediation` at `c85ae9e`, which created it on GitHub, and opened [pull request #1](https://github.com/factory-aj-pahl/spring-petclinic/pull/1) ready for review, not as a draft. `main` stayed at `500158f`. GitHub's checks on the pull request passed: the Maven and Gradle builds, OSV-Scanner and QA (20 of 20 test cases). The agent did not merge, approve or deploy; the pull request is open | Push 16:31:54 to 16:31:57, pull request 16:32:12, checks done 16:41:38 | `raw/github/push-branch.log`, `raw/github/pr-opened.txt`, `raw/github/pr-checks-c85ae9e.txt` |

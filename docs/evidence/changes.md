@@ -117,6 +117,6 @@ What the documents contain:
 | 15 | `407b5f3` | 15:31:18 | Blank line after the open questions table | 1 | 1 |
 | 16 | `c6b60ff` | 15:48:00 | GitHub settings for F13 and F22, F15 correction | 2 | 1 |
 
-Decision 1 is the approved plan, which covered the upgrade, the tests, the documentation, the readiness fixes, the QA and wiki skills and the pull request. Commits 4 and 5 have the same time because they were made one after the other in the same step. The application code and tests were last changed in commit 10. The last full test run was at commit 15, `407b5f3`; commit 16 and this package change only Markdown files.
+Decision 1 is the approved plan, which covered the upgrade, the tests, the documentation, the readiness fixes, the QA and wiki skills and the pull request. Commits 4 and 5 have the same time because they were made one after the other in the same step. The application code and tests were last changed in commit 10. The last full test run was at commit 15, `407b5f3`; commit 16 and this package change only Markdown files and the checksum list.
 
 To see one commit with its full message: `git show <commit>`.

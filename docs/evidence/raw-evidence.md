@@ -1,6 +1,6 @@
 # Raw evidence
 
-The evidence archive holds the raw output behind this package: build and test logs, JUnit reports, coverage reports, scan results, probe output, QA reports and screenshots, and the scripts that produced them. It has 567 files and about 21 MB of generated output, so it is not in the repository. It is delivered as the `evidence/` folder of `spring-petclinic-evaluation.zip`, next to a copy of the Markdown files in this directory.
+The evidence archive holds the raw output behind this package: build and test logs, JUnit reports, coverage reports, scan results, probe output, QA reports and screenshots, and the scripts that produced them. It has 592 files and about 21 MB of generated output, so it is not in the repository. It is delivered as the `evidence/` folder of `spring-petclinic-evaluation.zip`, next to a copy of the Markdown files in this directory.
 
 To check that an archive matches this package, run this in its `evidence/` folder:
 
@@ -70,7 +70,7 @@ Each QA directory has `report.md`, screenshots (`W*.png`), before-and-after comp
 | `raw/hook-e2e-droid-exec.jsonl` | The event stream of the `droid exec` session in which the hook let `echo hook-check-allowed` run and stopped `gh pr merge` | Session |
 | `raw/hook-live-block-main-session.txt` | The hook's block of a merge command in the main session at 04:21:48, with the hook's message | Session, written by the agent from the tool result |
 | `raw/seed-main/` | `push.log`: the one-time push of `500158f` to `main` (decision 7). `repo-settings.txt`: the repository settings that the GitHub API returned after it. | `scripts/seed-main.sh`; session |
-| `raw/github/` | `upstream-settings.txt`: branch protection, rulesets and CODEOWNERS of `spring-projects/spring-petclinic`. `runs-after-seed.txt`: the workflow runs on `main` after the seed push. | Session |
+| `raw/github/` | `upstream-settings.txt`: branch protection, rulesets and CODEOWNERS of `spring-projects/spring-petclinic`. `runs-after-seed.txt`: the workflow runs on `main` after the seed push. `push-branch.log`: the push of the feature branch, with the remote branches before and after it. `pr-opened.txt`: the pull request as GitHub returned it after it was opened. `pr-checks-c85ae9e.txt`: the checks and workflow runs for `c85ae9e`, and the comments on the pull request. `qa-ci-job.json`: the steps of the QA job. `qa-ci-comment.md` and `qa-ci-comment-meta.json`: the QA report comment. `qa-ci-run-43463692800/`: the artifact of the QA workflow run, downloaded with `gh run download`: `qa-results/report.md`, the screenshots and `app.log`, and `qa-output.txt`, Droid's final message. | Session |
 | `raw/lint/workflow-lint.txt` | actionlint, and GitHub's JSON schemas for the workflows, Dependabot and the issue forms, at `c6b60ff` | Session |
 | `raw/credential-scan.txt` | The scan of the archive for credentials and personal data | `scripts/credential-scan.py` |
 
@@ -88,7 +88,7 @@ Each QA directory has `report.md`, screenshots (`W*.png`), before-and-after comp
 | `osv_api_check.py` | Queries the OSV.dev API for every artifact in a `dependency:list` file, independently of OSV-Scanner |
 | `qa_post_step_test.py`, `qa_post_step_test.out` | Runs the report comment steps of `.github/workflows/qa.yml` locally in 25 cases, and its output |
 | `redact-session-ids.py` | Replaced the HTTP session ids in `raw/findings-probe-final/h2-probe.json` and `h2-probe.txt` |
-| `credential-scan.py` | Scans the archive for tokens, keys, session ids, passwords and email addresses |
+| `credential-scan.py` | Scans the archive, except its own output, for tokens, keys, session ids, passwords and email addresses |
 | `collect-tests.py`, `collect-tdd.py`, `test-names.py`, `count-labels.py` | Print the numbers used in this package: tests per class before and after, the failures of the red runs, the test case names, and the labels in `docs/DEPENDENCIES.md` |
 
 ## Redactions and personal data

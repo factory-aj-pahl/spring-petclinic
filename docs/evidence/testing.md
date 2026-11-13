@@ -1,6 +1,6 @@
 # What was tested
 
-All tests ran in the agent's sandbox: 4 CPUs, OpenJDK 17.0.21, Docker 29.1.3, OSV-Scanner 2.7.1. Every run below has its logs and JUnit reports in the evidence archive. The checks that GitHub runs on the pull request are recorded in [approval-record.md](approval-record.md) after the pull request was opened.
+All tests ran in the agent's sandbox (4 CPUs, OpenJDK 17.0.21, Docker 29.1.3, OSV-Scanner 2.7.1), except the checks that GitHub ran on the pull request ([GitHub checks on the pull request](#github-checks-on-the-pull-request)). Every sandbox run below has its logs and JUnit reports in the evidence archive.
 
 | Measure | Before: `500158f`, Spring Boot 4.1.0 | After: `407b5f3` | Evidence |
 |---------|--------------------------------------|------------------|----------|
@@ -11,6 +11,7 @@ All tests ran in the agent's sandbox: 4 CPUs, OpenJDK 17.0.21, Docker 29.1.3, OS
 | Line coverage (JaCoCo, Maven) | 94.0 %, 313 of 333 lines | 94.5 %, 312 of 330 lines | `raw/baseline-docker/jacoco.csv`, `raw/final-4/jacoco.csv` |
 | Branch coverage | 82.0 %, 100 of 122 branches | 84.4 %, 103 of 122 branches | Same |
 | QA against the running application | Not applicable | 18 of 18 test cases pass | `raw/qa-run-1794584301/report.md` |
+| GitHub checks on the pull request | Not applicable | The Maven and Gradle builds, OSV-Scanner and QA pass; QA 20 of 20 test cases | `raw/github/pr-checks-c85ae9e.txt` |
 
 ## Tests added
 
@@ -80,6 +81,7 @@ The QA skill built the branch, started it with the in-memory H2 database and tes
 |-----|------|--------|----------|
 | QA run 1, 13:34 to 13:40 | `f9bbb32` with the QA skill, before it was committed | 16 of 16 test cases pass | `raw/qa-run-1794576862/report.md` and screenshots |
 | QA run 2, 15:38 to 15:43 | `407b5f3` | 18 of 18 test cases pass | `raw/qa-run-1794584301/report.md` and screenshots |
+| QA in GitHub Actions, 16:32 to 16:41 | `204566f`, the merge commit that GitHub built for the pull request at `c85ae9e` | 20 of 20 test cases pass | `raw/github/qa-ci-run-43463692800/qa-results/report.md` and screenshots |
 
 QA run 2 covered the changed code first: owner and vets paging with huge, negative and malformed page numbers, 200 distinct out-of-range vets pages, the library versions in the SBOM endpoint, and the JSON, XML and Actuator endpoints. It then covered the pages that the change could affect: the home page, owner search, adding and editing owners, pets and visits with validation, the error pages and the language switch. Run 1 reported two problems with the browser tool, a navigation race and date inputs, and suggested skill updates for them; both are now in the Known Failure Modes of `.factory/skills/qa-web/SKILL.md`.
 
@@ -108,7 +110,23 @@ The probe also checked that the generated database password appears in none of i
 | The hook in a new `droid exec` session | Let `echo hook-check-allowed` run and stopped a command that contained `gh pr merge` | `raw/hook-e2e-droid-exec.jsonl` |
 | The hook in the main session | Stopped an Execute call whose text contained a merge command at 04:21:48 | `raw/hook-live-block-main-session.txt` |
 
-The QA and wiki workflows have not run in GitHub Actions, because they need secrets that only the owner can add ([not-completed.md](not-completed.md)).
+The QA workflow ran on the pull request ([GitHub checks on the pull request](#github-checks-on-the-pull-request)). The wiki workflow runs only after a push to `main`, so it has not run ([not-completed.md](not-completed.md)).
+
+## GitHub checks on the pull request
+
+GitHub ran these checks after the pull request was opened. For pull request events, GitHub builds the merge commit `204566f`: the head `c85ae9e` merged into `main` at `500158f`.
+
+| Check | Workflow | Result | Time |
+|-------|----------|--------|------|
+| `build (17)` | Java CI with Maven | Pass | 16:32:19 to 16:35:12 |
+| `build (17)` | Java CI with Gradle | Pass | 16:32:20 to 16:35:20 |
+| `scan-pr / osv-scan` | OSV-Scanner | Pass: the pull request adds no known vulnerability | 16:32:19 to 16:33:31 |
+| `scan-full` | OSV-Scanner | Skipped, as intended: it runs on pushes to `main` and every week | |
+| `qa` | QA | Pass: 20 of 20 test cases. Informational; it does not block merging. | 16:32:19 to 16:41:38 |
+
+The QA check ran the QA skill with Droid on the GitHub runner, so the `FACTORY_API_KEY` secret is set; without it, the job skips QA and only reports that QA did not run. It built the merge commit, started it with the H2 database and tested 20 cases: the owner and vets page numbers around the new cap, the vets cache after 500 out-of-range requests, the library versions in the SBOM endpoint, the JSON, XML and Actuator endpoints, and the pages that the change could affect. It posted its report as a comment on the pull request. The report's Action Required section says that the `droid-control` plugin, which `.factory/settings.json` enables, is not installed on the runner, so the run drove the browser with `agent-browser` directly. Video evidence is off, so no evidence was lost. Whether `qa.yml` should install the plugin is for the reviewer to decide; nothing was changed for it.
+
+Evidence: `raw/github/pr-checks-c85ae9e.txt` (the checks, the workflow runs and the comments on the pull request), `raw/github/qa-ci-job.json` (the steps of the QA job), `raw/github/qa-ci-comment.md` (the report comment), and `raw/github/qa-ci-run-43463692800/` (the artifact of the workflow run: the report, screenshots, the application log and the Droid output).
 
 ## Failures during the work
 
