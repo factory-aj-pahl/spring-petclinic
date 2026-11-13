@@ -1,5 +1,6 @@
 # Runs the Droid QA skill (.factory/skills/qa) on every pull request to main and keeps one
-# report comment on the pull request up to date.
+# report comment on the pull request up to date. Pull requests that change only droid-wiki/
+# (the Droid Wiki Refresh pull request) change no application code and are skipped.
 #
 # Informational only: this check does not block merging. Do not add it to the required status
 # checks of the main branch.
@@ -12,6 +13,8 @@ name: QA
 on:
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - 'droid-wiki/**'
   workflow_dispatch:
 
 permissions:

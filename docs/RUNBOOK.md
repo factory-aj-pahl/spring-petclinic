@@ -65,13 +65,22 @@ The first scan resolves the dependency tree from `pom.xml`, the second checks wh
 
 ## QA check on pull requests
 
-`.github/workflows/qa.yml` runs the Droid QA skill on every pull request to `main`. Droid builds the branch, starts it on the runner with the in-memory H2 database, uses the pages and endpoints that the diff can affect, and keeps one QA report comment on the pull request up to date. A pull request that changes only documentation, CI or tests gets an INCONCLUSIVE report, because no application code changed.
+`.github/workflows/qa.yml` runs the Droid QA skill on every pull request to `main`, except pull requests that change only `droid-wiki/`. Droid builds the branch, starts it on the runner with the in-memory H2 database, uses the pages and endpoints that the diff can affect, and keeps one QA report comment on the pull request up to date. A pull request that changes only documentation, CI or tests gets an INCONCLUSIVE report, because no application code changed.
 
 - The check is informational. Do not make it a required status check.
 - It needs the `FACTORY_API_KEY` repository secret. Without the secret, the report comment says that QA did not run. Dependabot pull requests read Dependabot secrets, so add the key there as well. Pull requests from forks get no secrets, so the job is skipped for them.
 - The full report, screenshots and the server log are in the `qa-results-<run id>-<attempt>` artifact of the workflow run for 14 days.
 - To run QA locally, start Droid in the repository and ask it to run the `qa` skill. Results go to `qa-results/<run id>/`, which Git and the nohttp check ignore.
 - The flows and their pass criteria are in `.factory/skills/qa-web/SKILL.md` (pages, through a real browser) and `.factory/skills/qa-api/SKILL.md` (JSON and Actuator endpoints, through curl). Settings, such as video evidence, are in `.factory/skills/qa/config.yaml`.
+
+## Wiki refresh
+
+`.github/workflows/droid-wiki-refresh.yml` runs the Droid `/wiki` skill after every push to `main`. It writes the pages to `droid-wiki/` and opens one pull request from the `factory/droid-wiki` branch, which later runs update in place. A person reviews and merges that pull request. The workflow does not upload the wiki to Factory or to the GitHub wiki, so the pages exist only in the repository.
+
+- It needs two secrets: `FACTORY_API_KEY`, the same key as the QA check, and `FACTORY_WIKI_PR_TOKEN`, a fine-grained personal access token for this repository with read and write access to contents and pull requests. Without `FACTORY_WIKI_PR_TOKEN`, the workflow opens the pull request with the built-in `GITHUB_TOKEN`, and GitHub then starts no other workflows for it, so the build checks do not run on the wiki pull request.
+- Each run starts from the pages on `factory/droid-wiki` and rewrites only the pages whose code changed. The first run writes the whole wiki.
+- The QA check skips pull requests that change only `droid-wiki/`. The Maven and Gradle builds still run, and their nohttp check fails on `http://` links in the pages, localhost excepted.
+- Screenshots and the video overview are not committed.
 
 ## Upgrade Spring Boot to fix an advisory
 

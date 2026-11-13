@@ -53,6 +53,8 @@ say which tests were skipped instead of counting them as passed.
 - Sign off every commit with `git commit -s`. The repository requires a Developer Certificate of
   Origin sign-off (`.github/dco.yml`).
 - Keep each commit to one purpose and explain the reason in the message.
+- Do not edit `droid-wiki/` by hand. The Droid Wiki Refresh workflow regenerates it after pushes to
+  `main` (see [the runbook](docs/RUNBOOK.md#wiki-refresh)).
 
 ## What agents must not do
 
